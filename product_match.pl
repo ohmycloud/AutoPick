@@ -405,7 +405,7 @@ my @encoded_headers;
 foreach (@{$headers[0]}) {
 push @{$encoded_headers[0]},decode("gb2312",$_);
 };
-
+my $head_format = $workbook->add_format( align => 'center',font => 'Arial', size => 8,bg_color => '#D3D3D3'); # lightgray
 my $format1     = $workbook->add_format( align => 'left',  font => 'Arial', size => 8);
 my $format2     = $workbook->add_format( align => 'left',  font => 'Arial', size => 8,num_format => '@');
 my @columns;
@@ -414,28 +414,26 @@ foreach my $old_sheet( @{$excel -> {Worksheet}}[0] ) {  # 只读取第一张工作表，直
         my @columns; 
         my $new_worksheet  =  $workbook->add_worksheet(H($old_sheet->{Name}));  # 将原来的工作表名添加到新的 Excel
 		$new_worksheet->keep_leading_zeros(); # 保留前导0
-		$new_worksheet->write_col( 'A1', \@encoded_headers,$format1);
+		$new_worksheet->write_col( 'A1', \@encoded_headers,$head_format); # 写入表头
 	    $old_sheet -> {MaxCol} ||= $old_sheet -> {MinCol};  #|| 逻辑或，返回计算结果先为真的值，由左到右计算
         	   
 # 读取原 Excel，然后写入 新 Excel        
 foreach my $col (0..16) {
 			    $old_sheet -> {MaxRow} ||= $old_sheet -> {MinRow}; 
                 foreach my $row ($old_sheet -> {MinRow} ..  $old_sheet -> {MaxRow}) {  
-					    push @{$columns[$col]},H($old_sheet -> {Cells} [$row] [$col]->{Val});
-						# push @{$columns[$col]},$old_sheet -> {Cells} [$row] [$col]->{Val};  # 提取固定的几列 
-						# say '-'.$old_sheet -> {Cells} [$row] [$col]->{Val};
+					    push @{$columns[$col]},H($old_sheet -> {Cells} [$row] [$col]->{Val});# 提取固定的几列
                     }
 # shift @{$columns[$col]};
 }
-	$new_worksheet->write_col( 'A2', \@{$columns[0]},$format2);
-	$new_worksheet->write_col( 'E2', \@{$columns[4]},$format1);
-	$new_worksheet->write_col( 'G2', \@{$columns[5]},$format1);
-	$new_worksheet->write_col( 'I2', \@{$columns[7]},$format1);
-	$new_worksheet->write_col( 'J2', \@{$columns[15]},$format1);
+	$new_worksheet->write_col( 'A2', \@{$columns[0]},$format2); # @columns 对应产品匹配维护.xlsx中的列
+	$new_worksheet->write_col( 'E2', \@{$columns[5]},$format1);
+	$new_worksheet->write_col( 'G2', \@{$columns[6]},$format1);
+	$new_worksheet->write_col( 'I2', \@{$columns[8]},$format1);
+	$new_worksheet->write_col( 'J2', \@{$columns[16]},$format1);
 	
-	# print Dumper(\@{$columns[7]});
+	# print Dumper(\@{$columns[8]});
 	
-	for my $name ( @{$columns[7]} ) {
+	for my $name ( @{$columns[8]} ) {
         chomp $name;
 		$encode_name = encode("gb2312",$name);  # 编码后才能让匹配识别
 		{
