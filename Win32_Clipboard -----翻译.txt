@@ -1,0 +1,180 @@
+Win32::Clipboard -----翻译
+绑定变量用着不错啊：（结合Win32::GuiTest使用，完成某些自动化功能）
+
+use strict;
+use warnings;
+
+use Win32::Clipboard;
+$|=1;
+my $CLIP;
+tie $CLIP, 'Win32::Clipboard';
+
+print "Clipboard content: $CLIP\n";
+
+
+foreach(1..20) {
+$CLIP = "some text to copy to the clipboard...$_\n";
+print $CLIP;
+sleep 1;
+}
+
+<>;
+
+-------------------------------------------------------------------------------------------------
+
+ 
+
+ 
+
+Module Version: 0.56 Source
+
+NAME
+SYNOPSIS
+DESCRIPTION
+REFERENCE
+CONSTANTS
+AUTHOR
+NAME
+Win32::Clipboard - 与Windows剪切板交互
+
+SYNOPSIS
+    use Win32::Clipboard;
+    $CLIP = Win32::Clipboard();
+    print "Clipboard contains: ", $CLIP->Get(), "\n";
+    $CLIP->Set("some text to copy into the clipboard");
+    $CLIP->Empty();#清空剪切板
+    $CLIP->WaitForChange();#监视变化
+    print "Clipboard has changed!\n";
+
+DESCRIPTION
+该模块允许你与Windows剪切板交互：你可以获取它的内容、设置它的内容、清空它的内容，或者让你的脚本休眠直到剪切板内容出现变化，该版本支持3种格式的剪切板数据：
+
+text (CF_TEXT)
+这样的剪切板含有一些文本; 这是你能设置剪切板数据唯一可用的格式。 you get it as a single string.
+
+Example:
+
+$text = Win32::Clipboard::GetText();
+    print $text;
+
+bitmap (CF_DIB)
+该剪切板含有图像，要么是位图，要么是从图形界面应用程序拷贝过来的照片。你获取的数据是一种二进制的缓存，该缓存是要被写入一个位图(BMP格式)文件的.
+
+Example:
+
+$image = Win32::Clipboard::GetBitmap();
+    open    BITMAP, ">some.bmp";
+    binmode BITMAP;
+    print   BITMAP $image;
+    close   BITMAP;
+
+list of files (CF_HDROP)
+该剪切板含有从像资源管理器应用程序复制或剪切的文件；你得到一个文件名列表：
+
+Example:
+
+ @files = Win32::Clipboard::GetFiles();
+    print join("\n", @files);
+
+REFERENCE
+所有的函数都能以它们的全名的方式(例如 Win32::Clipboard::Get)使用或者作为一个Win32::Clipboard 对象使用。关于语法, 查看上面的 "SYNOPSIS". 注意，你可以创建一个剪切板对象并同时使用下面的方法设置它的内容：
+
+    $CLIP = Win32::Clipboard("blah blah blah");
+
+    或使用更普通的格式:
+
+    $CLIP = new Win32::Clipboard("blah blah blah");
+
+如果你愿意，你甚至可以将剪切板绑定到一个变量上，就像这样：
+
+tie $CLIP, 'Win32::Clipboard';
+    print "Clipboard content: $CLIP\n";
+    $CLIP = "some text to copy to the clipboard...";
+
+在这种情况下, 你仍能使用tied()函数访问其它方法：
+
+tied($CLIP)->Empty;
+    print "got the picture" if tied($CLIP)->IsBitmap;
+
+Empty()
+清空剪切板.
+
+EnumFormats()
+返回一个描述当前剪切板中数据格式的标识符的数组，标识符可以是标准的(下面的"CONSTANTS"一节有描述)或应用程序定义的普通标识符，也可查看IsFormatAvailable().
+
+Get()
+返回剪切板的内容；注意结果依赖于剪切板数据的种类，为了确保你只想得到想要的格式，你应该使用GetText(), GetBitmap() 或 GetFiles() 代替. Get()实际上以如下方式完成：
+
+    if(    IsBitmap() ) { return GetBitmap(); }
+    elsif( IsFiles()  ) { return GetFiles();  }
+    else                { return GetText();   }
+
+获取数据前，还请查看sBitmap(), IsFiles(), IsText(), EnumFormats() 和 IsFormatAvailable() 来检查剪切板的格式。
+
+ 
+
+GetAs(FORMAT)
+
+返回指定格式的剪切板内容。(可以是 "CONSTANTS" 一节定义的常量之一或是一种普通格式。注意有意义的标识符只有CF_TEXT, CF_UNICODETEXT, CF_DIB 和 CF_HDROP;其它任何格式都被当做字符串。
+
+如果使用 CF_UNICODETEXT ,则返回二进制的Unicode数据。perl的unicode字符串能按如下方式生成：
+
+    $text = $clip->GetAs(CF_UNICODETEXT);
+    $text = Encode::decode("UTF16-LE", $text);
+
+GetBitmap()
+剪切板内容作为图像返回，或者如果出错就返回undef.
+
+ 
+
+GetFiles()
+
+剪切板内容作为文件名列表返回，出错返回undef
+
+GetFormatName(FORMAT)
+返回指定的普通剪切板格式的名字，出错返回undef。注意你不能获取标准格式的名字。 (described in the "CONSTANTS" section).
+
+GetText()
+剪切板内容作为字符串返回，出错返回undef
+
+IsBitmap()
+返回一个布尔值表明剪切板是否含有图像See also GetBitmap().
+
+IsFiles()
+返回一个布尔值表明剪切板是否含有一个文件列表See also GetFiles().
+
+IsFormatAvailable(FORMAT)
+检查剪切板数据是否匹配指定的FORMAT(one of the constants described in the "CONSTANTS" section); 不匹配就返回0，匹配则返回一个非0值。
+
+IsText()
+返回一个布尔值表明剪切板是否含有文本See also GetText().
+
+Set(VALUE)
+设置剪切板内容为指定字符串。.
+
+WaitForChange([TIMEOUT])
+该函数暂停脚本直到剪切板内容出现变化。如果你指定一个TIMEOUT值（毫秒），该函数就会在超时之后返回，即使剪切板没有变化。如果没有设置该值，它就会无限等待。如果剪切板出现变化就返回1，出错返回undef。
+
+CONSTANTS
+这些常量是Win32::Clipboard识别的标准剪切板格式：
+
+    CF_TEXT             1
+    CF_DIB              8
+    CF_HDROP            15
+
+下面这些格式不被Win32::Clipboard识别；然而它们是导出的常量，并能用于EnumFormats(), IsFormatAvailable() 和 GetAs() 函数:
+
+    CF_BITMAP           2
+    CF_METAFILEPICT     3
+    CF_SYLK             4
+    CF_DIF              5
+    CF_TIFF             6
+    CF_OEMTEXT          7
+    CF_PALETTE          9
+    CF_PENDATA          10
+    CF_RIFF             11
+    CF_WAVE             12
+    CF_UNICODETEXT      13
+    CF_ENHMETAFILE      14
+    CF_LOCALE           16
+

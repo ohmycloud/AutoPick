@@ -1,0 +1,364 @@
+首先介绍几个学习Perl的Blog：
+
+http://www.php-oa.com/
+
+http://blog.fayland.org/
+
+http://mooser.me/
+
+http://blog.yikuyiku.com/
+
+http://blog.sina.com.cn/s/blog_494724250100d53u.html Perl书籍下载
+
+1、换行符问题
+
+  写一只程序，提示用户输入一个字符串和一个数值（分两行键入），然后数值为重复次数，连续输出多行字符串。
+
+#!/usr/bin/perl
+
+print "Enter a string:";
+
+$str=<STDIN>;
+
+print `"Enter a number of times:";
+
+chomp($num=<STDIN>);
+
+$result=$str x $result;
+
+print "The result is:\n$result ";
+
+#输出结果如下：
+
+The rtesult is:
+
+Perl
+
+Perl
+
+Perl
+
+#如果是Print "The result is: $result";会输出如下内容：
+
+The result is:Perl
+
+Perl
+
+Perl
+
+故利用换行符可以进行良好的排版；另外，如果用户输入的数据没有使用chomp，在打印时就不必加上"\n"了。一如最后的print "the result is:\nresult";
+
+-------------------------------------大爱分割线--------------------------------------------
+
+ 
+
+2、写一支名为&above_average的子例程，用来传入一串数字并返回所有大于平均值的数字。
+
+sub total { #计算总和
+
+my $sum;
+
+  foreach (@_){
+
+   $sum+=$_;
+
+  }
+
+ $sum;
+
+}
+
+ 
+
+sub average{
+
+  if (@_==0){return}
+
+  my $count=@_;
+
+  my $sum=&total(@_);
+
+  $sum/$count;
+
+}
+
+sub above_average{
+
+ my $average=&average(@_);
+
+ my @list;
+
+ foreach $element(@_){
+
+     if ($element>$average){
+
+         push @list,$element;
+
+     }
+
+ }
+
+@list;
+
+}
+
+my @fred=&above_average(1..10);
+
+print "\@fred is @fred\n";
+
+print "(should be 6 7 8 9 10)","\n";
+
+my @barney=&above_average(100,1..10);
+
+print "\@barney is @barney\n";
+
+print "(should be just 100)\n";
+
+ 
+
+-------------------------------------大爱分割线--------------------------------------------
+
+3、my 操作符只能申明独立的变量，不能用来申明数组或散列里的元素！例如：
+
+my $family{"Shalvon"}="sxw";#糟糕！
+
+-------------------------------------大爱分割线--------------------------------------------
+
+4、数组与printf
+
+ my @items=qw(wilma dino pebbles);
+
+ my $format="The items are:\n" . ("s\n" x @items);
+
+printf $format,@items;
+
+ 
+
+#合在一块就是printf "The items are:\n".("s\n" x @items),@items;
+
+-------------------------------------大爱分割线--------------------------------------------
+
+5、求最大值与最小值
+
+ $maximum=&max(3,5,10,4,6);
+
+sub max {
+
+ my ($max_so_far)=shift @_;#哨兵是$max_so_far
+
+foreach`(@_){
+
+ if ($_>$max_so_far){
+
+ $max_so_far=$_;
+
+}
+
+}
+
+$max_so_far;
+
+}
+
+#求最小值类似上面的方法
+
+-------------------------------------大爱分割线--------------------------------------------
+
+6、return 操作符
+
+在子例程里，return 操作符会立即返回某个值，而不再执行子例程的其余部分：
+
+my @name   =qw/fred barney dino betty wilma/;
+
+my $result =&which_element_is("dino`,@names");
+
+sub which_element_is {
+
+my ($what,@list)=@_;
+
+foreach(0..$#list){
+
+ if ($what eq $list[$_]){
+
+   return $_; #一发现就提前返回值，不再执行子例程的其他部分
+
+}
+
+}
+
+-1； #找不到元素，return 在此可有可无
+
+}
+
+-------------------------------------大爱分割线--------------------------------------------
+
+ 
+
+7、写一支程序，读取一连串的单词（每行一个）直至输入结束，然后输出一份列出每个单词的出现次数的列表。根据ASCII码顺序输出报表上的单词。（引申：输出一篇文章中每个单词出现次数，或每个字符的出现次数）。
+
+my (@words,%count,$word); #申明变量可以省略
+
+chomp(@words=<STDIN>);
+
+foreach $word (@words){
+
+  $count{$word}+=1;
+
+  }
+
+ foreach $word (keys %count){ #或sort keys %count
+
+       print "$word was seen $count{$word} times.\n";
+
+  }
+
+-------------------------------------大爱分割线--------------------------------------------
+
+8、写个程序，输出在输入数据中同时出现wilma及fred的每一行
+
+   while(<>){
+
+     if (/wilma/) {
+
+         if (/fred/) {print;}
+
+   }
+
+}
+
+-------------------------------------大爱分割线--------------------------------------------
+
+9、用/x加上空白
+
+  /x可用来作为宽松字符排列，加上/x后模式里可以任意留空白，如果仍需要匹配空白符的话，可使用\s、\s*、\s+
+
+  由于在Perl中，注释也算是一种空白，所以我们可以把注释写在模式中以指明其用途：
+
+  /
+
+  -?   #一个可选的负号
+
+  \d+  #小数点之前有一个或多个数字
+
+  \.?  #可有可无的小数点
+
+  \d*  #小数点后可能有若干数字
+
+/X     #模式的终点
+
+注意：如果模式需要匹配#号，用\#或[#],在注释里不要写入界定字符。
+
+-------------------------------------大爱分割线--------------------------------------------
+
+10、大小写转换
+
+    print "Hello,\L\u$name\E, would you like to play a game?\n";
+
+    #$name全部转小写，但首字母大写
+
+-------------------------------------大爱分割线--------------------------------------------
+
+11、split 操作符
+
+   @fields=split /separator/,string;
+
+   eg:@list=split /:/,"abc:def:g:h";
+
+   #产生("abc","def","g","h")
+
+另外，split 会保留开头处的空字段，舍弃结尾处的空字段：
+
+ @fields=split /:/,":::a:b:c:::";
+
+ # 产生("","","","a","b","c")
+
+ split 默认会以空白字符拆开$_:
+
+ my @fields=split; #等同于split /\s+/,$_;
+
+-------------------------------------大爱分割线--------------------------------------------
+
+12、join函数
+
+ join $string,@pieces; # join的第一个参数必须是字符串
+
+ eg：my $sem   =join ":",4,6,8,10,12;
+
+     my @value =split /:/,$sem;
+
+     my $z=join "-",@value; 
+
+#split的结果是一个数组，join的结果是标量$xxx
+
+-------------------------------------大爱分割线--------------------------------------------
+
+13、列表上下文中的m//
+
+   在列表上下文中,m//将匹配到的值存到数组中：
+
+   my $text="Fred dropped a 5 ton granite block on Mr.Sv";
+
+   my @words=($text =~ /([a-z]+)/ig); # 使用//定界符时可省略m
+
+ 
+
+将匹配内容存入散列
+
+  my $data="Barney Rubble Fred Flint Wilma Filntstone";
+
+  my %last_name=($data =~ /(\w+)\s+(\w+)/g);
+
+14、跨行的模式匹配（多行模式）
+
+    $_="I'm much better\n than Barney is \n at bowling,\n wilma.\n";
+
+    print "Found 'Wilma' at start of line\n" if /^Wilma\n/im;
+
+   #加上/m修饰符后，^和$匹配的不再是整个字符串的头尾，而是每行的开头和结尾。
+
+ 
+
+  eg: open FILE,$filename or die "Can't open '$filename':$!";
+
+      my $lines =join '',<FILE>;
+
+      $lines =~ s/^/$filename:/gm; # <FILE> 是数组吧?
+
+-------------------------------------大爱分割线--------------------------------------------
+
+15、$^I变量
+
+    #!/usr/bin/perl -w
+
+    use strict;
+
+    chomp(my $data=`data`);
+
+    $^I =".bak";
+
+    while(<>){
+
+       s/^Author:.*/Author:Randa L.Schwartz/;
+
+       s/^phone:.*\n//;
+
+       s/^Date:.*/Data:$data/;
+
+       print;
+
+  }
+
+其中，$^I是设置备份文件的扩展名的，如果将其设置为空字符串，将直接在源文件上修改，这是很危险的。
+
+如何运作：先假设钻石操作符正好打开了test1.txt,然后它还会把文件名改成test1.txt.bak。接着钻石操作符会打开一个新文件并取名为test1.txt。此后，钻石操作符会把默认的输出设定为这个新打开的文件。
+
+  所以，输出来的所有内容都会被写进这个文件，所以钻石操作符会同时打开两个文件，将源文件改名备份后，从备份文件中读取一行输入，做些修改后把新内容存入新文件。
+
+-------------------------------------大爱分割线--------------------------------------------
+
+16、从命令行修改文件
+
+    perl -p -i.bak -w -e `s/Randall/Randal/g` test*.txt
+
+    其中-p表示"打印"，也可换做-n。-i.bak表示备份，直接写-i不备份
+

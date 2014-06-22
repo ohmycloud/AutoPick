@@ -1,0 +1,100 @@
+# 如何用Perl求解方程组的正整数解初探
+
+use strict;
+use warnings;
+
+#求正整数解
+
+#2x+3y=21，所求方程必须是形如ax+by+cz=M的格式
+
+my $_="1" x 21;
+$_=~m{
+  (.*)\1
+  (.*)\2{2}
+  (?{
+  print "$1=>$2\n" if $1.$1.$2.$2.$2 eq $_
+  })
+  (?!)}x;
+#---------------------------------------------
+
+111111111=>1  x=9,y=1
+111111=>111   x=6,y=3
+111=>11111    x=3,y=5
+=>1111111     x=7,y=0
+
+ 
+
+ 
+
+改进版本：
+
+use strict;
+use warnings;
+my $_="1" x 21;
+$_=~m{
+  (.*)\1
+  (.*)\2{2}
+  (?{
+  my $a=split //,$1;my $b=split //,$2;print "x=$a,y=$b\n" if $1.$1.$2.$2.$2 eq $_
+  })
+  (?!)}x;
+
+ 
+
+x=9,y=1
+x=6,y=3
+x=3,y=5
+x=0,y=7
+
+# 如何用Perl求解方程组的正整数解再探
+
+use strict;
+use warnings;
+#计算二元方程组
+#2x+3y=21
+die "Usage:Perl $0 ax+by=Z\n" if @ARGV==0;
+my $expression=shift @ARGV;
+
+my @number=$expression=~m/\d+/g;
+print "@number\n";
+my $_="1" x $number[2];
+$_=~m{
+  (.*)\1
+  (.*)\2{2}
+  (?{
+  my $a=split //,$1;my $b=split //,$2;print "x=$a,y=$b\n" if ($1 x $number[0]) . ($2 x $number[1]) eq $_
+  })
+  (?!)}x;
+
+ 
+
+# 程序还不完善，也没什么用处吧。比如输入perl test.pl 3x+4y=30时，会有重复的结果。
+
+# 如何用Perl求解方程组的正整数解总结
+#可以求解三元以上的，只是个思路，可以推广。
+
+use strict;
+use warnings;
+#计算二元方程组
+#2x+3y=21
+die "Usage:Perl $0 ax+by=Z\n" if @ARGV==0;
+my $expression=shift @ARGV;
+
+my @number=$expression=~m/\d+/g;
+print "@number\n";
+my $_="1" x $number[2];
+my %seen;
+$_=~m{
+  (.*)\1
+  (.*)\2{2}
+  (?{
+  my $a=split //,$1;
+  my $b=split //,$2;
+  $seen{"x=$a,y=$b"}=1 if ($1 x $number[0]) . ($2 x $number[1]) eq $_ ;
+  })
+  (?!)}x;
+
+foreach my $result (sort keys %seen) {
+  print "$result\n";
+}
+
